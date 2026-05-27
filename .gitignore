@@ -1,0 +1,104 @@
+# -----------------------------
+# Node / JavaScript
+# -----------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-lock.yaml
+
+# -----------------------------
+# Environment / Secrets
+# -----------------------------
+.env
+.env.*
+*.local
+*.secret
+
+# -----------------------------
+# Logs
+# -----------------------------
+logs/
+*.log
+
+# -----------------------------
+# Build / Distribution
+# -----------------------------
+dist/
+build/
+coverage/
+out/
+release/
+
+# -----------------------------
+# Adobe UXP / Plugin Packaging
+# -----------------------------
+*.ccx
+*.zip
+
+# -----------------------------
+# Python / FastAPI Backend
+# -----------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+.python-version
+
+# -----------------------------
+# IDE / Editor
+# -----------------------------
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# -----------------------------
+# OS Generated Files
+# -----------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# -----------------------------
+# Temporary Files
+# -----------------------------
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+
+# -----------------------------
+# Local Testing / Debug Assets
+# -----------------------------
+test-output/
+debug-output/
+mockups-output/
+exports/
+screenshots-temp/
+
+# -----------------------------
+# DB / Local Database Dumps
+# -----------------------------
+*.bson
+*.archive
+dump/
+
+
+
+
+# -----------------------------
+# Optional: Keep sample JSON but ignore private production data
+# -----------------------------
+data/private/
+data/live/
+
+.vs/
+*.psd
+src/config.js

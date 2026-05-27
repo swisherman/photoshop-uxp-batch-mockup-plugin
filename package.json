@@ -1,0 +1,8 @@
+{
+   "name": "photoshop-uxp-batch-mockup-plugin",
+  "version": "0.1.0",
+  "description": "A Photoshop UXP plugin for batch mockup generation using JSON or DB-driven PSD templates, automated phrase replacement, mascot swapping, and organized PNG export workflows.",
+  "author": "Robert Walkama",
+  "license": "MIT"
+}
+

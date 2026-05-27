@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="main.js"></script> 
+    <link rel="stylesheet" href="style.css">   
+</head>
+<body>
+    
+
+    <div id="psdPanelSection">
+        <h2>PSD Template</h2>
+        <div>
+            <sp-radio-group id="psdSourceGroup" selected="db">
+                <sp-radio value="db">DB / Endpoint</sp-radio>
+                <sp-radio value="json">JSON File</sp-radio>
+            </sp-radio-group>
+        </div>
+        <button id="loadPsdFromDb">Load PSD List from DB</button>
+        <button id="loadPsdFromJson">Load PSD List from JSON</button>
+<sp-button id="changePSDRootFolder">Select PSD Root Folder</sp-button>
+		<div>PSD Root folder: <span id="currentPSDRootFolder">Not selected</span>
+			
+		</div>
+        
+        <sp-picker id="psdPicker" label="PSD Template">
+            <sp-menu slot="options" id="psdMenu"></sp-menu>
+        </sp-picker>
+
+        <button id="openSelectedPSD" disabled>Open selected PSD</button>
+
+    </div>
+    <div id="mainPanelSection">
+        <h2>Import Designs</h2>
+        <sp-radio-group id="phraseSourceGroup" value="json">
+            <sp-radio value="json">JSON File</sp-radio>
+            <sp-radio value="db">DB / Endpoint</sp-radio>
+        </sp-radio-group>
+        <div class="psd-folder-status">
+		
+		<sp-button id="btnRunPhraseImport">Run Phrase Import</sp-button>
+		
+		
+        <sp-button id="changeInputFolder">Change Input Folder</sp-button>
+        <sp-button id="changeOutputFolder">Change Output Folder</sp-button>
+		<div class="folder-status">
+			<div>Input folder: <span id="currentInputFolder">Not selected</span></div>
+			<div>Output folder: <span id="currentOutputFolder">Not selected</span></div>
+		</div>
+    </div>
+	</div>
+  <sp-body id="psdindb">
+ 
+  </sp-body>
+  <footer>
+   
+  </footer>
+</body>
+</html>

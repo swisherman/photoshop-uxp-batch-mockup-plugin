@@ -1,0 +1,37 @@
+[
+    {
+      "Phrase": "I Am Evaluating",
+      "FolderName": "I.Am.Evaluating",
+      "ExpectedFolderName": "I.Am.Evaluating",
+      "MatchFound": false,
+      "Filename": "eval.png"
+    },
+    {
+      "Phrase": "This Is Not Ideal",
+      "FolderName": "This.Is.Not.Ideal",
+      "ExpectedFolderName": "This.Is.Not.Ideal",
+      "MatchFound": false,
+      "Filename": "frog.png"
+    },
+    {
+      "Phrase": "I Will Observe",
+      "FolderName": "I.Will.Observe",
+      "ExpectedFolderName": "I.Will.Observe",
+      "MatchFound": false,
+      "Filename": "owl1.png"
+    },
+    {
+      "Phrase": "This Is Acceptable",
+      "FolderName": "This.Is.Acceptable",
+      "ExpectedFolderName": "This.Is.Acceptable",
+      "MatchFound": false,
+      "Filename": "bear.png"
+    },
+    {
+      "Phrase": "I Will Reconsider",
+      "FolderName": "I.Will.Reconsider",
+      "ExpectedFolderName": "I.Will.Reconsider",
+      "MatchFound": false,
+      "Filename": "fox.png"
+    }
+]
