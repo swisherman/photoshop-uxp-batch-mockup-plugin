@@ -1,27 +1,40 @@
 # Photoshop UXP Batch Mockup Plugin
 
-Automates PSD template loading, phrase replacement, mascot swapping, and structured PNG export for scalable mockup production.
+A Photoshop UXP workflow execution engine for automated, batch-oriented mockup production.
 
-Supports both local JSON-driven workflows and remote API/database-driven workflows.
+The plugin coordinates Photoshop, configurable PSD workflow definitions, REST APIs, and structured production records to execute repeatable multi-step mockup pipelines.
 
-**Version:** 0.1.0  
+It can operate independently with local JSON data or as the Photoshop execution component of the larger **Mockup Workflow Platform**.
+
+**Version:** 0.2.0  
 **Author:** Robert Walkama  
 **License:** MIT  
 
 ---
 
 ## Why This Exists
-Built to eliminate repetitive Photoshop mockup production by combining PSD template management, structured design imports, smart object automation, and scalable export pipelines.
+
+Large-scale mockup production often requires repeatedly opening templates, replacing artwork, exporting files, organizing output folders, and reporting completion.
+
+This plugin converts those manual Photoshop tasks into configurable workflow steps that can be executed against structured production batches.
+
+Rather than hard-coding one mockup process, the plugin supports product-specific workflow processors and ordered PSD workflow definitions.
 
 ## Core Features
-- PSD template loading from JSON or MongoDB
-- Persistent PSD root folders by source
-- Structured design import from JSON or DB
-- Smart object mascot replacement
-- Smart object phrase replacement
-- Organized folder-based PNG export
 
----
+- Batch-oriented Photoshop automation
+- Pending batch discovery through REST APIs
+- Configurable, ordered PSD workflow steps
+- Product-specific workflow processors
+- Dynamic PSD template discovery and selection
+- Smart object artwork and phrase replacement
+- Group-based and whole-document PNG export
+- Automatic upload of generated output files
+- Per-item success and failure reporting
+- Automatic continuation across workflow steps
+- Local JSON and API/database data sources
+- Persistent PSD and folder permissions through Adobe UXP
+
 ## Screenshots
 
 ### Plugin Panel
@@ -30,7 +43,9 @@ Built to eliminate repetitive Photoshop mockup production by combining PSD templ
 ### PSD Template Selection
 ![PSD Template Selection](./assets/screenshots/psd-selection.png)
 
-### Structured Export Output
+### Generated Batch Structure
+Generated assets are organized into a predictable batch and product directory structure, allowing downstream workflow stages to process input and mockup files consistently.
+
 ![Export Results](./assets/screenshots/input-export-results-tree.png)
 ![Sample Input](./assets/screenshots/i-will-observe-input.png)
 ![Sample Output](./assets/screenshots/i-will-observe-output.png)
@@ -43,110 +58,43 @@ The demo below shows PSD selection, structured record processing, smart object r
 
 ---
 
-## Architecture / Workflow
+## Architecture
 
-## High-Level Workflow
-
-The plugin automates batch Photoshop mockup generation using structured JSON or DB-driven input.
-
-### Processing Flow
+The plugin executes configurable Photoshop workflow steps against production batches supplied by either local JSON files or external services.
 
 ```mermaid
-graph TD
+flowchart LR
 
-A[Load PSD Template List] --> B[Select PSD Template]
-B --> C[Open PSD]
+Queue["Pending Batch Queue"]
+Workflow["Workflow Definition"]
+Plugin["Photoshop UXP Plugin"]
+PSD["PSD Templates"]
+Photoshop["Adobe Photoshop"]
+Output["Generated Mockups"]
+API["Workflow APIs"]
 
-C --> D[Load Design Records]
-D --> E[Iterate Through Records]
-
-E --> F[Replace Phrase Smart Object]
-E --> G[Replace Mascot Smart Object]
-
-F --> H[Update Document]
-G --> H
-
-H --> I[Export PNG Groups]
-I --> J[Organized Output Folders]
+Queue --> Plugin
+Plugin --> Workflow
+Workflow --> PSD
+Plugin --> Photoshop
+Photoshop --> Output
+Plugin --> API
 ```
 
 ---
+## Execution Pipeline
 
-## Core Workflow
+For each production batch, the plugin executes an ordered workflow:
 
-### 1. PSD Template Selection
-
-The plugin loads PSD template metadata from either:
-
-* JSON file
-* DB/API endpoint
-
-Templates are displayed in the UI and opened dynamically through Adobe UXP APIs.
-
----
-
-### 2. Structured Design Import
-
-The plugin imports structured records containing:
-
-* phrase text
-* mascot/image references
-* folder names
-* output metadata
-
-Example fields:
-
-```json
-{
-  "Phrase": "I Am Evaluating",
-  "FolderName": "I.Am.Evaluating",
-  "Mascot": "raccoon",
-  "Filename": "eval.png"
-}
-```
-
-This separates:
-
-* workflow data
-* document automation logic
-
-making large-scale processing possible.
-
----
-
-### 3. Smart Object Replacement
-
-For each imported record, the plugin:
-
-* updates text smart objects
-* replaces mascot/image smart objects
-* refreshes document content dynamically
-
-This enables scalable mockup generation without manually editing PSDs.
-
----
-
-### 4. Group-Based Export Pipeline
-
-The plugin traverses Photoshop layer groups and exports compositions as PNG files.
-
-Typical workflow:
-
-```txt
-Completed/
-├── I.Am.Evaluating/
-│   ├── mockup-1.png
-│   ├── mockup-2.png
-│   └── mockup-3.png
-```
-
-Exports are organized into structured output folders for downstream workflows such as:
-
-* Etsy
-* Shopify
-* Print-on-demand pipelines
-* batch listing generation
-
+1. Discover pending batches or load local records.
+2. Load the workflow definition for the selected product type.
+3. Open the PSD template for the current workflow step.
+4. Execute the corresponding workflow processor.
+5. Replace artwork, text, or smart objects.
+6. Export generated output images.
+7. Upload generated assets to downstream services when configured.
+8. Mark the workflow item as completed or failed.
+9. Continue automatically to the next workflow step until the batch finishes.
 ---
 
 ## File System Integration
@@ -163,39 +111,85 @@ This avoids repeated folder selection and improves production workflow efficienc
 
 ## Supported Data Sources
 
-### PSD Templates
+The plugin is designed to support both standalone and distributed production workflows.
 
-* JSON file
-* DB/API endpoint
+### PSD Workflow Definitions
 
-### Design Records
+Workflow definitions can be loaded from:
 
-* JSON file
-* DB/API endpoint
+- Local JSON files
+- REST API endpoints
+- Database-backed services
 
-This allows the plugin to operate in:
+Each workflow definition specifies:
 
-* local/offline workflows
-* database-driven production environments
+- product type
+- ordered workflow steps
+- PSD template
+- execution order
+
+### Production Records
+
+Production records can be supplied from:
+
+- Local JSON files
+- Workflow API endpoints
+
+Each record can include information such as:
+
+- artwork or image reference
+- phrase or text
+- output folder
+- filename
+- batch identifier
+- product type
+
+This separation between workflow definitions and production data allows the same Photoshop workflows to process different products without modifying plugin code.
 
 ---
 
-## Technical Components
+## Technical Architecture
 
-### Frontend
+### User Interface
 
-* JavaScript
-* Adobe UXP APIs
-* Spectrum Web Components
+- Adobe UXP
+- Spectrum Web Components
+- JavaScript
 
-### Workflow Features
+### Workflow Engine
 
-* asynchronous batch processing
-* persistent storage tokens
-* structured export handling
-* folder-based automation
-* data-driven document updates
+- Ordered workflow execution
+- Product-specific workflow processors
+- Dynamic PSD template loading
+- Sequential batch processing
 
+### Integration
+
+- REST API communication
+- JSON data sources
+- Persistent folder permissions
+- Structured output generation
+
+### Photoshop Automation
+
+- Smart object replacement
+- Layer manipulation
+- PNG export
+- PSD document management
+
+---
+## Design Highlights
+
+The project demonstrates several software engineering concepts beyond Photoshop scripting:
+
+- Data-driven workflow definitions
+- Product-specific workflow dispatch
+- Separation of UI, workflow engine, and service layer
+- REST API integration
+- Sequential workflow execution
+- Configurable PSD processing pipelines
+- Persistent Adobe UXP storage management
+- Fault-tolerant batch processing
 ---
 
 ## Design Goal
@@ -204,12 +198,29 @@ The primary goal of the plugin is to reduce repetitive Photoshop production work
 
 The plugin supports structured PSD template loading, smart object replacement, JSON or DB-driven workflows, and organized PNG export generation for batch mockup production.
 
-## Install / Load in Photoshop
+## Installation
 
-1. Copy `src/config.example.js` to `src/config.js`
-2. Open Adobe UXP Developer Tool
-3. Add the `src/` folder as the plugin
-4. Load the plugin in Photoshop
+1. Clone the repository.
+
+```bash
+git clone https://github.com/swisherman/photoshop-uxp-batch-mockup-plugin.git
+```
+
+2. Copy the example configuration.
+
+```text
+src/config.example.js
+        ↓
+src/config.js
+```
+
+3. Update the API endpoints in `config.js` for your environment.
+
+4. Open Adobe UXP Developer Tool.
+
+5. Add the `src/` folder as a plugin.
+
+6. Load the plugin in Photoshop.
 
 ## Quick Start Demo
 
@@ -223,50 +234,43 @@ git clone https://github.com/swisherman/photoshop-uxp-batch-mockup-plugin.git
 
 ## Configuration
 
-The real `config.js` file is excluded via `.gitignore` to avoid committing local endpoints or environment-specific settings.
+The plugin reads its runtime configuration from `src/config.js`.
 
-This project uses a local configuration file that is intentionally excluded from source control.
+A sample configuration is provided as:
 
-Copy:
-
-```txt
+```text
 src/config.example.js
 ```
 
-to:
+Copy it to:
 
-```txt
+```text
 src/config.js
 ```
 
-Example configuration:
+The src/config.js file is intentionally excluded from source control so that environment-specific settings and local service endpoints are never committed.
+
+`API_BASE_URL` should point to your local Workflow API instance. Additional endpoint paths are configured within the plugin.
+
+Example:
 
 ```javascript
 const CONFIG = {
-    API_BASE_URL: "http://localhost:8054",
+    API_BASE_URL: "http://localhost:5767",
+
     ENDPOINTS: {
-        RECORDS_READY: "/records/ready",
-        PSDS: "/psds",
-        LOG: "/logs"
+        // Workflow API endpoints
     },
-	HEADERS: {
-    "Content-Type": "application/json"
-}
+
+    HEADERS: {
+        "Content-Type": "application/json"
+    }
 };
 
 module.exports = CONFIG;
 ```
 
-
-### JSON-Based Demo Workflow
-1. Select PSD Template → JSON File
-2. Load examples/PSDFiles.json
-3. Select PSD Root Folder → templates
-4. Open selected PSD
-5. Select Import Designs JSON
-6. Choose input/output folders
-7. Run Phrase Import
-
+The `src/config.js` file is intentionally excluded from source control so that environment-specific settings and local service endpoints are never committed.
 ---
 ## Demo Data Notes
 
@@ -314,31 +318,42 @@ Designed for scalable production workflows such as:
 - Internal creative production pipelines
 
 ## Known Limitations
-- PSD template structure currently expects named smart object layers:
-  - mascot
-  - phrase
-- Input folder assets must align with expected folder/file naming
-- DB / endpoint mode depends on external service availability
-- UI polish and additional validation are still in progress
 
-
+- Requires Adobe Photoshop with UXP support.
+- Demo workflows assume compatible PSD templates.
+- API-driven workflows require the supporting workflow services to be running.
+- Additional product-specific workflow processors are planned.
 
 ## Current Status
-Version 0.1.0 is an active proof-of-work release demonstrating:
 
-- JSON + DB workflow support
-- Batch PSD automation
-- Smart object phrase + mascot replacement
-- Structured export logic
+The project has evolved from a single-template Photoshop automation tool into a configurable workflow execution engine capable of processing production batches through ordered PSD workflow definitions.
 
-Planned improvements:
+Current capabilities include:
 
-- Enhanced validation
-- UI refinement
-- Config abstraction
-- Expanded documentation
+- Batch-oriented workflow execution
+- Configurable multi-step PSD pipelines
+- Product-specific workflow processors
+- Local JSON and REST API data sources
+- Dynamic PSD template selection
+- Automatic batch progression and completion reporting
+- Structured PNG export
+- Persistent Adobe UXP folder permissions
+
+Future work will focus on expanding workflow processors, improving extensibility, and refining the user experience.
 
 ## Project Structure
+
+
+### Key Directories
+
+| Directory | Purpose |
+|-----------|---------|
+| `src/` | Plugin source code, UI, and workflow engine |
+| `src/services/` | REST API communication and data access |
+| `assets/` | Screenshots and demo media |
+| `examples/` | Sample workflow definitions and demo data |
+| `templates/` | Example PSD template structure |
+
 
 ```txt
 assets/

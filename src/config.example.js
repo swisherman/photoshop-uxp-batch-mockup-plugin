@@ -1,5 +1,5 @@
 const CONFIG = {
-    API_BASE_URL: "http://localhost:8054",
+    API_BASE_URL: "http://localhost:5767",
 
     ENDPOINTS: {
         PSDS: "/psds",

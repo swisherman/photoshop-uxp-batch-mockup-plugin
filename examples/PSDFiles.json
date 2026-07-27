@@ -2,6 +2,8 @@
   {
     "FilePathName": "shirts/phrase-replacer.psd",
     "Description": "Shirt Template",
-	"RequiresRootFolder": true
+    "ProductType": "tshirt",
+    "RequiresRootFolder": true,
+    "WorkflowStep": 10
   }
 ]

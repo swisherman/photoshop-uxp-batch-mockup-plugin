@@ -1,69 +1,82 @@
-const { app } = require("photoshop");
-const fs = require("uxp").storage.localFileSystem;
-const CONFIG  = require("../config.js");
+const CONFIG = require("../config.js");
 
-const url = `${CONFIG.API_BASE_URL}${CONFIG.ENDPOINTS.PSDS}`;
+const url =
+    `${CONFIG.API_BASE_URL}${CONFIG.ENDPOINTS.PSDS}`;
 
- class PhotoshopPSD 
- {
-	constructor()
-	{
-	this.FilePathName="";
-	this.Description="";
-	
-	this.PixelWidth =0;
-	this.PixelHeight =0;
-	this.Created= new Date().toISOString();
-	}
-	    
- }
-class PhotoshopPSDCollection
-{
-    constructor() { }
-	
+class PhotoshopPSD {
+    constructor() {
+        this.FilePathName = "";
+        this.Description = "";
+        this.ProductType = "";
+
+        this.PixelWidth = 0;
+        this.PixelHeight = 0;
+        this.Created = new Date().toISOString();
+    }
+}
+
+class PhotoshopPSDCollection {
     async GetRecordsReadyForMockupProcessing() {
+        const response = await fetch(url);
 
-  
-    const response = await fetch(url);
+        if (!response.ok) {
+            const errorBody = await response.text();
 
-    if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+            console.error(
+                `PSD endpoint failed: HTTP ${response.status}`,
+                errorBody
+            );
+
+            throw new Error(
+                `PSD endpoint failed: HTTP ${response.status}: ${errorBody}`
+            );
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data)) {
+            throw new Error(
+                "PSD endpoint did not return an array."
+            );
+        }
+
+        return data.filter(item =>
+            String(item.processingStatus || "")
+                .trim()
+                .toLowerCase() !== "processed" &&
+            item.mockupProcessed !== true
+        );
     }
 
+    async GetAllRecords() {
+        const response = await fetch(url);
 
-    // Parse JSON
-    let data;
+        if (!response.ok) {
+            const errorBody = await response.text();
 
-    try {
-		data = await response.json();
+            console.error(
+                `PSD endpoint failed: HTTP ${response.status}`,
+                errorBody
+            );
 
-    // Return only records NOT already processed
-    return data.filter(item =>
-        item.processingStatus !== "processed" &&
-        item.mockupProcessed !== true
-    );
+            throw new Error(
+                `PSD endpoint failed: HTTP ${response.status}: ${errorBody}`
+            );
+        }
 
-   
-    } catch (err) {
-        console.log(`Error parsing JSON: ${err.message}`);
-        throw new Error("Invalid JSON.");
+        const data = await response.json();
+
+        if (!Array.isArray(data)) {
+            throw new Error(
+                "PSD endpoint did not return an array."
+            );
+        }
+
+        return data;
     }
 }
 
-async GetAllRecords() {
-    const response = await fetch(url);
-
-    if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-    }
-
-    return await response.json();
-}
-}
-	 
- 
- 
- module.exports = {
+module.exports = {
     PhotoshopPSD,
-	PhotoshopPSDCollection
+    PhotoshopPSDCollection
 };

@@ -5,54 +5,126 @@
     <link rel="stylesheet" href="style.css">   
 </head>
 <body>
-    
+      <div id="mainPanelSection">
 
-    <div id="psdPanelSection">
-        <h2>PSD Template</h2>
-        <div>
-            <sp-radio-group id="psdSourceGroup" selected="db">
-                <sp-radio value="db">DB / Endpoint</sp-radio>
-                <sp-radio value="json">JSON File</sp-radio>
-            </sp-radio-group>
-        </div>
-        <button id="loadPsdFromDb">Load PSD List from DB</button>
-        <button id="loadPsdFromJson">Load PSD List from JSON</button>
-<sp-button id="changePSDRootFolder">Select PSD Root Folder</sp-button>
-		<div>PSD Root folder: <span id="currentPSDRootFolder">Not selected</span>
-			
-		</div>
-        
-        <sp-picker id="psdPicker" label="PSD Template">
-            <sp-menu slot="options" id="psdMenu"></sp-menu>
-        </sp-picker>
+          <section class="panel-section">
+              <h2>Batch</h2>
+              <div class="control-group">
+                  <sp-picker id="batchPicker" label="Pending Batch">
+                      <sp-menu slot="options" id="batchMenu"></sp-menu>
+                  </sp-picker>
 
-        <button id="openSelectedPSD" disabled>Open selected PSD</button>
+                  <button id="loadPendingBatches"
+                          type="button"
+                          class="secondary-action">
+                      Refresh Batches
+                  </button>
+              </div>
+
+              <div class="batch-summary-chips">
+                  <div class="status-chip status-chip-pending">
+                      <span class="chip-label">Batch</span>
+                      <span id="selectedBatchStatus" class="chip-value">None</span>
+                  </div>
+
+                  <div class="status-chip">
+                      <span class="chip-label">Product Type</span>
+                      <span id="selectedProductType" class="chip-value">Unknown</span>
+                  </div>
+
+                  <div class="status-chip">
+                      <span class="chip-label">Items</span>
+                      <span id="selectedBatchItemCount" class="chip-value">0</span>
+                  </div>
+              </div>
+          </section>
+
+
+          <section class="panel-section">
+              <h2>Template</h2>
+
+              <div class="control-group">
+                  <sp-picker id="psdDropdown" label="PSD Template">
+                      <sp-menu slot="options" id="psdMenu"></sp-menu>
+                  </sp-picker>
+
+                  <button id="openSelectedPSD"
+                          type="button"
+                          class="secondary-action"
+                          disabled>
+                      Open Template
+                  </button>
+              </div>
+
+              <div class="folder-status compact">
+                  <strong>PSD folder:</strong>
+                  <span id="currentPSDRootFolder">Not selected</span>
+              </div>
+          </section>
+
+
+          <section class="panel-section run-section">
+              <h2>Generate</h2>
+
+              <sp-button id="btnRunPhraseImport" variant="accent">
+                  Generate Mockups
+              </sp-button>
+
+              <div class="status-box generation-status-box">
+                  <div>
+                      <strong>Status:</strong>
+                      <span id="generationStatus">Ready</span>
+                  </div>
+              </div>
+          </section>
+
+
+        <section class="panel-section advanced-section">
+            <button id="toggleAdvanced" type="button">Advanced / Settings ▼</button>
+
+            <div id="advancedPanel" style="display: none;">
+
+                <h3>PSD Source</h3>
+
+                <sp-radio-group id="psdSourceGroup" selected="db">
+                    <sp-radio value="db">DB / Endpoint</sp-radio>
+                    <sp-radio value="json">JSON File</sp-radio>
+                </sp-radio-group>
+
+                <div class="row">
+                    <button id="loadPsdFromDb" type="button">Load PSD List from DB</button>
+                    <button id="loadPsdFromJson" type="button">Load PSD List from JSON</button>
+                    <sp-button id="changePSDRootFolder">Choose PSD Folder</sp-button>
+                </div>
+
+
+                <h3>Mockup Source</h3>
+
+                <sp-radio-group id="phraseSourceGroup" selected="db">
+                    <sp-radio value="db">Batch Queue</sp-radio>
+                    <sp-radio value="json">JSON File</sp-radio>
+                </sp-radio-group>
+
+
+                <h3>Folder Overrides</h3>
+
+                <div class="row">
+                    <sp-button id="changeInputFolder">Input Folder...</sp-button>
+                    <sp-button id="changeOutputFolder">Output Folder...</sp-button>
+                </div>
+
+                <div class="folder-status">
+                    <div>Input folder: <span id="currentInputFolder">Not selected</span></div>
+                    <div>Output folder: <span id="currentOutputFolder">Not selected</span></div>
+                </div>
+            </div>
+        </section>
 
     </div>
-    <div id="mainPanelSection">
-        <h2>Import Designs</h2>
-        <sp-radio-group id="phraseSourceGroup" value="json">
-            <sp-radio value="json">JSON File</sp-radio>
-            <sp-radio value="db">DB / Endpoint</sp-radio>
-        </sp-radio-group>
-        <div class="psd-folder-status">
-		
-		<sp-button id="btnRunPhraseImport">Run Phrase Import</sp-button>
-		
-		
-        <sp-button id="changeInputFolder">Change Input Folder</sp-button>
-        <sp-button id="changeOutputFolder">Change Output Folder</sp-button>
-		<div class="folder-status">
-			<div>Input folder: <span id="currentInputFolder">Not selected</span></div>
-			<div>Output folder: <span id="currentOutputFolder">Not selected</span></div>
-		</div>
-    </div>
-	</div>
-  <sp-body id="psdindb">
- 
-  </sp-body>
-  <footer>
-   
-  </footer>
+
+    <sp-body id="psdindb"></sp-body>
+
+    <footer></footer>
+
 </body>
 </html>

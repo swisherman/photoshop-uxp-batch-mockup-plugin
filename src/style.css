@@ -1,19 +1,348 @@
+/*==================================================
+  Variables
+==================================================*/
+
+:root {
+    /* colors */
+    /* spacing */
+    /* fonts */
+}
+
+/*==================================================
+  Base
+==================================================*/
+
 body {
     color: white;
     padding: 0 16px;
-  }
-  li:before {
+}
+
+button {
+}
+
+sp-button {
+}
+
+sp-picker {
+}
+
+li:before {
     content: '• ';
     width: 3em;
-  }
-  .hidden {
-    display: none;
-  }
-  #psdDropdown {
+}
+
+/*==================================================
+  Layout
+==================================================*/
+
+#mainPanelSection {
+}
+
+.panel-section {
+    margin-bottom: 18px;
+    padding: 12px;
+    border: 1px solid #4a4a4a;
+    border-radius: 6px;
+    background-color: #2b2b2b;
+}
+
+    .panel-section h2 {
+        margin: 0 0 14px;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+.panel-section:first-child {
+    margin-top: 0;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+footer {
+}
+/*==================================================
+  Reusable Compoents
+==================================================*/
+
+.status-box {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 4px;
+    background-color: #2d2d2d;
+    font-size: 12px;
+    line-height: 1.4;
+}
+.folder-status {
+}
+
+.compact {
+}
+/*==================================================
+  Batch Section
+==================================================*/
+
+#batchPicker {
+}
+
+#selectedBatchStatus {
+}
+
+/*==================================================
+  Template Section
+==================================================*/
+
+#psdDropdown {
+}
+
+#psdDropdown {
     width: 400px;
 }
-  #layers {
+
+#layers {
     border: 1px solid #808080;
     border-radius: 4px;
     padding: 16px;
-  }
+}
+
+/*==================================================
+  Generate Section
+==================================================*/
+
+.run-section {
+    text-align: center;
+    margin-top: 16px;
+    margin-bottom: 20px;
+}
+
+.run-section sp-button {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.run-section .status-box {
+    padding: 6px 8px;
+    font-size: 11px;
+ }
+
+#generationStatus {
+    font-weight: 600;
+}
+
+/*==================================================
+  Advanced Section
+==================================================*/
+
+.advanced-section {
+}
+
+.advanced-section summary {
+}
+
+.advanced-section h3 {
+}
+
+
+/*==================================================
+  Utility Classes
+==================================================*/
+
+.hidden {
+    display: none;
+}
+.disabled {
+}
+
+.error {
+}
+
+.success {
+}
+
+/* Main workflow layout */
+
+#mainPanelSection {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 10px;
+}
+
+.panel-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid #454545;
+    border-radius: 6px;
+    background: #292929;
+}
+
+    .panel-section h2 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .panel-section h3 {
+        margin: 12px 0 4px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+
+/* Picker and action groups */
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+    .control-group sp-picker {
+        width: 100%;
+    }
+
+.secondary-action {
+    width: 100%;
+    min-height: 30px;
+}
+
+
+/* Status information */
+
+.status-box {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 9px;
+    border-radius: 5px;
+    background: #202020;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+    .status-box strong {
+        font-weight: 600;
+    }
+
+.folder-status {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px;
+    border-radius: 5px;
+    background: #202020;
+    font-size: 11px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+    .folder-status.compact {
+        padding: 7px 8px;
+    }
+
+
+/* Generate section */
+
+.run-section {
+    border-color: #5a5a5a;
+}
+
+#btnRunPhraseImport {
+    width: 100%;
+}
+
+.generation-status-box {
+    margin-top: 2px;
+}
+
+
+/* Advanced section */
+
+.advanced-section {
+    padding: 0;
+    overflow: hidden;
+}
+
+#toggleAdvanced {
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    text-align: left;
+    font-weight: 600;
+    background: #333333;
+}
+
+#advancedPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+}
+
+    #advancedPanel .row {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    #advancedPanel button,
+    #advancedPanel sp-button {
+        width: 100%;
+    }
+
+    #advancedPanel sp-radio-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+.batch-summary-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+    padding: 4px 7px;
+    border: 1px solid #4a4a4a;
+    border-radius: 999px;
+    background: #2d2d2d;
+    font-size: 10px;
+    line-height: 1.2;
+}
+
+.status-chip-pending {
+    border-color: #6b5f2c;
+    background: #3b3520;
+}
+
+.chip-label {
+    color: #b8b8b8;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.chip-value {
+    color: #ffffff;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.status-chip .chip-value {
+    margin-left: 5px;
+}

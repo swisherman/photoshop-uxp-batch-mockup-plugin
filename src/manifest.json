@@ -11,7 +11,8 @@
     "localFileSystem": "request",
     "network": {
       "domains": [
-        "http://localhost:8054"
+        "http://localhost:5767",
+        "http://localhost:27021"
       ]
     }
   },

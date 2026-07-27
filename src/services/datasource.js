@@ -39,7 +39,65 @@ async function loadFromJson() {
 
     return data.items || data;
 }
+async function loadPendingBatches() {
+    const url =
+        `${CONFIG.API_BASE_URL}${CONFIG.ENDPOINTS.BATCHES_PENDING}`;
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        throw new Error(
+            `Pending batches endpoint failed: HTTP ${response.status}`
+        );
+    }
+
+    const data = await response.json();
+
+    if (!Array.isArray(data)) {
+        throw new Error(
+            "Pending batches endpoint did not return an array."
+        );
+    }
+
+    console.log(
+        `Loaded ${data.length} pending batch record(s).`
+    );
+
+    return data;
+}
+
+async function loadBatchReadyRecords(batchId) {
+    const url =
+        `${CONFIG.API_BASE_URL}${CONFIG.ENDPOINTS.BATCH_READY(
+            encodeURIComponent(batchId)
+        )}`;
+
+    const response = await fetch(url, {
+        cache: "no-store"
+    });
+
+    if (!response.ok) {
+        throw new Error(
+            `Batch-ready endpoint failed: HTTP  ${response.status}`
+        );
+    }
+
+    const data = await response.json();
+    if (!Array.isArray(data)) {
+        throw new Error(
+            "Batch-ready endpoint did not return an array."
+        );
+    }
+
+    console.log(
+        `Loaded ${data.length} batch-ready record(s).`
+    );
+
+    return data;
+}
 
 module.exports = {
-    loadPhraseRecords
+    loadPhraseRecords,
+    loadPendingBatches,
+    loadBatchReadyRecords
 };
