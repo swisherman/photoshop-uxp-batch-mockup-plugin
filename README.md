@@ -222,15 +222,17 @@ src/config.js
 
 6. Load the plugin in Photoshop.
 
-## Quick Start Demo
+## Quick Start
 
-⚠️ The plugin will not load correctly until `src/config.js` exists.
+After completing the installation and configuration steps:
 
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/swisherman/photoshop-uxp-batch-mockup-plugin.git
-```
+1. Launch Adobe Photoshop.
+2. Load the plugin using Adobe UXP Developer Tool.
+3. Choose either the **JSON** or **Database** data source.
+4. Refresh and select a pending batch (or load local JSON records).
+5. Select the appropriate PSD workflow template.
+6. Click **Generate Mockups**.
+7. Review the generated files in the configured output folder.
 
 ## Configuration
 
@@ -289,22 +291,34 @@ Example:
 ## Demo Folder Structure
 
 ```txt
-examples/
- ┗ PSDFiles.json
-templates/
- ┗ shirts/README.md
-input_folders/
- ┗ [design assets]
+## Sample Folder Structure
 
-mockup_folders/
- ┗ [exported PNGs]
+The included sample data demonstrates the directory layout expected by the plugin during batch processing.
+
+```text
+SampleData/
+└── tshirt/
+    ├── input_folders/
+    │   └── Awaiting.Further.Instructions/
+    │       └── duck-design.png
+    └── mockup_folders/
+        └── Awaiting.Further.Instructions/
+            ├── duck-design-Group.1.png
+            ├── duck-design-Group.2.png
+            ├── duck-design-Group.3.png
+            ├── ...
+            ├── duck-design-Group.9.png
+            └── duck-design.png
+```
+
+The plugin processes artwork from the `input_folders` directory and writes generated mockups to the corresponding `mockup_folders` directory while preserving the product and folder structure.
 ``` 
 
 ## Technical Stack
 - JavaScript (Adobe UXP)
 - Photoshop BatchPlay API
-- Local File System + Persistent Tokens
-- JSON / DB Data Sources
+- Adobe UXP Persistent File Permissions
+- Local JSON and REST API Data Sources
 - Smart Object Automation
 - Structured Batch Export Pipelines
 
