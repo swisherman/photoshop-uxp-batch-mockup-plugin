@@ -1,7 +1,5 @@
 # Photoshop UXP Batch Mockup Plugin
 
-# Photoshop UXP Batch Mockup Plugin
-
 ![GitHub release](https://img.shields.io/github/v/release/swisherman/photoshop-uxp-batch-mockup-plugin)
 ![License](https://img.shields.io/github/license/swisherman/photoshop-uxp-batch-mockup-plugin)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES2023-F7DF1E)
