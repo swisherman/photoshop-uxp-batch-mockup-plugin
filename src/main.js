@@ -1711,7 +1711,7 @@ async function runBatchMockupGeneration() {
 
             shouldTrackBatchStatus = true;
 
-            items = items.slice(0, 3);
+            items = items;
         } else {
             items = await loadPhraseRecords(
                 sourceType
