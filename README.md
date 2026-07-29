@@ -1,5 +1,11 @@
 # Photoshop UXP Batch Mockup Plugin
 
+![GitHub release](https://img.shields.io/github/v/release/swisherman/photoshop-uxp-batch-mockup-plugin)
+![License](https://img.shields.io/github/license/swisherman/photoshop-uxp-batch-mockup-plugin)
+![JavaScript](https://img.shields.io/badge/JavaScript-ES2023-F7DF1E)
+![Adobe UXP](https://img.shields.io/badge/Adobe-UXP-red)
+![Status](https://img.shields.io/badge/Status-Active%20Development-success)
+
 A Photoshop UXP workflow execution engine for automated, batch-oriented mockup production.
 
 The plugin coordinates Photoshop, configurable PSD workflow definitions, REST APIs, and structured production records to execute repeatable multi-step mockup pipelines.
