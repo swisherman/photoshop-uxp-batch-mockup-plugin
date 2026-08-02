@@ -18,14 +18,6 @@ It can operate independently with local JSON data or as the Photoshop execution 
 
 ---
 
-## Why This Exists
-
-Large-scale mockup production often requires repeatedly opening templates, replacing artwork, exporting files, organizing output folders, and reporting completion.
-
-This plugin converts those manual Photoshop tasks into configurable workflow steps that can be executed against structured production batches.
-
-Rather than hard-coding one mockup process, the plugin supports product-specific workflow processors and ordered PSD workflow definitions.
-
 ## Core Features
 
 - Batch-oriented Photoshop automation
@@ -40,6 +32,14 @@ Rather than hard-coding one mockup process, the plugin supports product-specific
 - Automatic continuation across workflow steps
 - Local JSON and API/database data sources
 - Persistent PSD and folder permissions through Adobe UXP
+
+## Why This Exists
+
+Large-scale mockup production often requires repeatedly opening templates, replacing artwork, exporting files, organizing output folders, and reporting completion.
+
+This plugin converts those manual Photoshop tasks into configurable workflow steps that can be executed against structured production batches.
+
+Rather than hard-coding one mockup process, the plugin supports product-specific workflow processors and ordered PSD workflow definitions.
 
 ## Screenshots
 
