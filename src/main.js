@@ -259,7 +259,7 @@ async function populatePSDDropdownFromDB(productType = null) {
         console.log("Requesting PSD records...");
 
         const records =
-            await psdCollection.GetRecordsReadyForMockupProcessing();
+            await psdCollection.GetAllRecords();
 
         console.log("PSD records returned:", records);
 
