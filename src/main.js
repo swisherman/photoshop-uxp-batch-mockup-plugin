@@ -11,7 +11,9 @@ const fs = storage.localFileSystem;
 const MASCOT_LAYER_NAME = "mascot";
 const PHRASE_SMART_OBJECT_NAME = "phrase";
 const INNER_PHRASE_TEXT_LAYER_NAME = "phrase";
-const PRINTABLE_WALL_ART_LAYER_NAME ="artwork";
+const PRINTABLE_WALL_ART_LAYER_NAME = "artwork";
+
+
 let currentPSDWorkflowSteps =[];
 
 function getSelectedBatchId() {
@@ -381,10 +383,15 @@ const workflowProcessors = new Map([
     ],
     [
         "printable-wall-art",
-        async ({ templateDoc, items }) => {
+        async ({ workflowStep, templateDoc, items }) => {
+            const templateKey =
+                workflowStep?.TemplateKey ??
+                workflowStep?.templateKey ??
+                "default";
             await runPrintableWallArtWorkflow(
                 templateDoc,
-                items
+                items,
+                templateKey 
             );
         }
     ]
@@ -1203,7 +1210,8 @@ async function exportPrintableWallArtPng(
     document,
     outputFolder,
     folderName,
-    sourceFileName
+    sourceFileName,
+    templateKey
 ) {
     const recordOutputFolder =
         await getOrCreateChildFolder(
@@ -1216,8 +1224,13 @@ async function exportPrintableWallArtPng(
             sourceFileName
         );
 
+    const normalizedTemplateKey =
+        String(templateKey ?? "default")
+            .trim()
+            .toLowerCase();
+
     const outputFileName =
-        `${baseName}-printable-wall-art.png`;
+        `${baseName}-printable-wall-art-${normalizedTemplateKey}.png`;
 
     const outputFile =
         await recordOutputFolder.createFile(
@@ -1392,7 +1405,8 @@ async function ensureUxpFileEntry(
 }
 async function runPrintableWallArtWorkflow(
     templateDoc,
-    items
+    items,
+    templateKey = "default"
 ) {
     if (!templateDoc) {
         throw new Error(
@@ -1435,6 +1449,9 @@ async function runPrintableWallArtWorkflow(
     );
     let processed = 0;
     let failed = 0;
+
+    const failedRecordIds = [];
+
 
     for (let index = 0; index < items.length; index++) {
         const item = items[index];
@@ -1546,7 +1563,8 @@ async function runPrintableWallArtWorkflow(
                                     workingDocument,
                                     outputFolder,
                                     folderName,
-                                    fileName
+                                    fileName,
+                                    templateKey
                                 );
 
                             console.log(
@@ -1616,19 +1634,14 @@ async function runPrintableWallArtWorkflow(
                 productType,
                 folderName
             );
-            console.log(
-                `Marking printable wall-art record complete: ${recordId}`
-            );
-
-            await markMockupComplete(recordId);
-
-            console.log(
-                `Printable wall-art record marked complete: ${recordId}`
-            );
-
+            
             processed++;
         } catch (err) {
             failed++;
+
+            if (recordId) {
+                failedRecordIds.push(recordId);
+            }
 
             console.error(
                 `Printable wall-art item failed ` +
@@ -1640,7 +1653,8 @@ async function runPrintableWallArtWorkflow(
 
     return {
         processed,
-        failed
+        failed,
+        failedRecordIds
     };
 }
 async function getPngFileFromApi(containerPath, fileName) {
@@ -1730,20 +1744,10 @@ async function runBatchMockupGeneration() {
             );
         }
 
-        console.log(
-            `Loaded ${items.length} workflow records.`
-        );
-
         if (shouldTrackBatchStatus) {
-            // await updateBatchProcessingStatus(
-            //     selectedBatchId,
-            //     {
-            //         processingStatus: "processing",
-            //         mockupProcessed: false,
-            //         mockupError: null
-            //     }
-            // );
+          
         }
+        const failedRecordIds = new Set();
 
         for (
             const workflowStep
@@ -1781,6 +1785,12 @@ async function runBatchMockupGeneration() {
 
                         }
                     );
+                for (
+                    const failedRecordId
+                    of stepResult?.failedRecordIds ?? []
+                ) {
+                    failedRecordIds.add(failedRecordId);
+                }
 
                 if (stepResult?.failed > 0) {
                     console.warn(
@@ -1803,15 +1813,43 @@ async function runBatchMockupGeneration() {
         }
 
         if (shouldTrackBatchStatus) {
-            // await updateBatchProcessingStatus(
-            //     selectedBatchId,
-            //     {
-            //         processingStatus: "completed",
-            //         mockupProcessed: true,
-            //         mockupError: null
-            //     }
-            // );
+            
         }
+
+        if (productType === "printable-wall-art") {
+            for (const item of items) {
+                const recordId =
+                    item?.Id ??
+                    item?.id;
+
+                if (!recordId) {
+                    continue;
+                }
+
+                if (failedRecordIds.has(recordId)) {
+                    console.warn(
+                        `Not marking printable wall-art record complete ` +
+                        `because at least one template failed: ${recordId}`
+                    );
+
+                    continue;
+                }
+
+                console.log(
+                    `Marking printable wall-art record complete after ` +
+                    `all templates succeeded: ${recordId}`
+                );
+
+                await markMockupComplete(recordId);
+
+                console.log(
+                    `Printable wall-art record marked complete: ${recordId}`
+                );
+            }
+        }
+
+
+
 
         console.log(
             "All PSD workflow steps finished."
@@ -1832,19 +1870,9 @@ async function runBatchMockupGeneration() {
                     : String(err);
 
             try {
-                // await updateBatchProcessingStatus(
-                //     selectedBatchId,
-                //     {
-                //         processingStatus: "failed",
-                //         mockupProcessed: false,
-                //         mockupError: errorMessage
-                //     }
-                // );
+               
             } catch (statusError) {
-                // console.error(
-                //     "Could not update failed batch status:",
-                //     statusError
-                // );
+                
             }
         }
 
