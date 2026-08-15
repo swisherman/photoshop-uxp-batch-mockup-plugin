@@ -12,10 +12,60 @@ const MASCOT_LAYER_NAME = "mascot";
 const PHRASE_SMART_OBJECT_NAME = "phrase";
 const INNER_PHRASE_TEXT_LAYER_NAME = "phrase";
 const PRINTABLE_WALL_ART_LAYER_NAME = "artwork";
+const PRINTABLE_WALL_ART_WINDOW_LAYER_NAME = "ARTWORK_WINDOW";
 
+let currentPSDWorkflowSteps = [];
 
-let currentPSDWorkflowSteps =[];
+async function fitLayerToLayerBounds(
+    sourceLayer,
+    targetLayer
+) {
+    const sourceBounds = sourceLayer.bounds;
+    const targetBounds = targetLayer.bounds;
 
+    const sourceWidth =
+        sourceBounds.right - sourceBounds.left;
+
+    const sourceHeight =
+        sourceBounds.bottom - sourceBounds.top;
+
+    const targetWidth =
+        targetBounds.right - targetBounds.left;
+
+    const targetHeight =
+        targetBounds.bottom - targetBounds.top;
+
+    const scalePercent =
+        Math.min(
+            targetWidth / sourceWidth,
+            targetHeight / sourceHeight
+        ) * 100;
+
+    await sourceLayer.scale(
+        scalePercent,
+        scalePercent
+    );
+
+    const scaledBounds =
+        sourceLayer.bounds;
+
+    const sourceCenterX =
+        (scaledBounds.left + scaledBounds.right) / 2;
+
+    const sourceCenterY =
+        (scaledBounds.top + scaledBounds.bottom) / 2;
+
+    const targetCenterX =
+        (targetBounds.left + targetBounds.right) / 2;
+
+    const targetCenterY =
+        (targetBounds.top + targetBounds.bottom) / 2;
+
+    await sourceLayer.translate(
+        targetCenterX - sourceCenterX,
+        targetCenterY - sourceCenterY
+    );
+}
 function getSelectedBatchId() {
     const picker = document.getElementById("batchPicker");
     const menu = document.getElementById("batchMenu");
@@ -602,12 +652,10 @@ async function applyArtworkToMockup(doc, artworkFile) {
             `Could not find smart object layer named ${MASCOT_LAYER_NAME}.`
         );
     }
-
     await replaceSmartObjectContents(
         mascotLayer,
         artworkFile
     );
-
     await renameLayer(
         mascotLayer,
         MASCOT_LAYER_NAME
@@ -842,22 +890,17 @@ async function runArtworkWorkflow(
             const folderName =
                 item?.FolderName ??
                 item?.folderName;
-
             const fileName =
                 item?.Filename ??
                 item?.filename ??
                 item?.fileName;
-
             const recordId =
                 item?.id ??
                 item?.Id;
-
-
             const productType =
                 item?.ProductType ??
                 item?.productType ??
                 "tshirt";
-
             const inputFolderPath =
                 item?.InputFolderPath ??
                 item?.inputFolderPath;
@@ -1547,10 +1590,33 @@ async function runPrintableWallArtWorkflow(
                                     `${PRINTABLE_WALL_ART_LAYER_NAME}`
                                 );
                             }
+                            const artworkWindowLayer =
+                                findLayerByName(
+                                    workingDocument.layers,
+                                    PRINTABLE_WALL_ART_WINDOW_LAYER_NAME
+                                );
 
+                            if (!artworkWindowLayer) {
+                                throw new Error(
+                                    `Printable wall-art window layer not found: ` +
+                                    `${PRINTABLE_WALL_ART_WINDOW_LAYER_NAME}`
+                                );
+                            }
+                            console.log(
+                                `ARTWORK bounds BEFORE replacement [${templateKey}]:`,
+                                artworkLayer.bounds
+                            );
                             await replaceSmartObjectContents(
                                 artworkLayer,
                                 artworkFile
+                            );
+                            await fitLayerToLayerBounds(
+                                artworkLayer,
+                                artworkWindowLayer
+                            );
+                            console.log(
+                                `ARTWORK bounds AFTER replacement [${templateKey}]:`,
+                                artworkLayer.bounds
                             );
 
                             console.log(
@@ -1839,9 +1905,7 @@ async function runBatchMockupGeneration() {
                     `Marking printable wall-art record complete after ` +
                     `all templates succeeded: ${recordId}`
                 );
-
                 await markMockupComplete(recordId);
-
                 console.log(
                     `Printable wall-art record marked complete: ${recordId}`
                 );
