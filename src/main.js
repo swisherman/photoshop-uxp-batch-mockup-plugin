@@ -182,16 +182,22 @@ async function refreshPsdRootFolderStatus() {
 
 function getFolderTokenKeysForSelectedSource() {
     const selectedSource = getSelectedPhraseSource();
+    const selectedBatchId = getSelectedBatchId();
 
     return {
         selectedSource,
+
         inputTokenKey: selectedSource === "json"
             ? "jsonInputFolderToken"
-            : "dbInputFolderToken",
+            : selectedBatchId
+                ? `dbInputFolderToken_${selectedBatchId}`
+                : "dbInputFolderToken",
 
         outputTokenKey: selectedSource === "json"
             ? "jsonOutputFolderToken"
-            : "dbOutputFolderToken"
+            : selectedBatchId
+                ? `dbOutputFolderToken_${selectedBatchId}`
+                : "dbOutputFolderToken"
     };
 }
 
@@ -438,7 +444,7 @@ const workflowProcessors = new Map([
                 workflowStep?.TemplateKey ??
                 workflowStep?.templateKey ??
                 "default";
-            await runPrintableWallArtWorkflow(
+            return await runPrintableWallArtWorkflow(
                 templateDoc,
                 items,
                 templateKey 
@@ -1494,6 +1500,7 @@ async function runPrintableWallArtWorkflow(
     let failed = 0;
 
     const failedRecordIds = [];
+    const mockupFilesByRecordId = new Map();
 
 
     for (let index = 0; index < items.length; index++) {
@@ -1700,6 +1707,17 @@ async function runPrintableWallArtWorkflow(
                 productType,
                 folderName
             );
+            if (recordId) {
+                const mockupFiles =
+                mockupFilesByRecordId.get(recordId) ?? [];
+
+            mockupFiles.push(exportedFile.name);
+
+            mockupFilesByRecordId.set(
+                recordId,
+                mockupFiles
+            );
+        }
             
             processed++;
         } catch (err) {
@@ -1720,7 +1738,8 @@ async function runPrintableWallArtWorkflow(
     return {
         processed,
         failed,
-        failedRecordIds
+        failedRecordIds,
+        mockupFilesByRecordId
     };
 }
 async function getPngFileFromApi(containerPath, fileName) {
@@ -1814,6 +1833,7 @@ async function runBatchMockupGeneration() {
           
         }
         const failedRecordIds = new Set();
+        const mockupFilesByRecordId = new Map();
 
         for (
             const workflowStep
@@ -1857,6 +1877,22 @@ async function runBatchMockupGeneration() {
                 ) {
                     failedRecordIds.add(failedRecordId);
                 }
+                for (
+    const [recordId, mockupFiles]
+    of stepResult?.mockupFilesByRecordId ?? []
+) {
+    const accumulatedFiles =
+        mockupFilesByRecordId.get(recordId) ?? [];
+
+    accumulatedFiles.push(
+        ...mockupFiles
+    );
+
+    mockupFilesByRecordId.set(
+        recordId,
+        accumulatedFiles
+    );
+}
 
                 if (stepResult?.failed > 0) {
                     console.warn(
@@ -1905,7 +1941,16 @@ async function runBatchMockupGeneration() {
                     `Marking printable wall-art record complete after ` +
                     `all templates succeeded: ${recordId}`
                 );
-                await markMockupComplete(recordId);
+                const mockupFiles =
+            mockupFilesByRecordId.get(recordId) ?? [];
+                console.log(
+                    `Mockup files collected for ${recordId}:`,
+                    mockupFiles
+                );
+            await markMockupComplete(
+                recordId,
+                mockupFiles
+            );
                 console.log(
                     `Printable wall-art record marked complete: ${recordId}`
                 );
@@ -2790,7 +2835,7 @@ async function uploadMockupFolderToApi(folder, batchId, productType, folderName)
         }
     }
 }
-async function markMockupComplete(recordId) {
+async function markMockupComplete(recordId, mockupFiles = []) {
     if (!recordId) {
         throw new Error("Cannot mark mockup complete: missing record id.");
     }
@@ -2798,8 +2843,14 @@ async function markMockupComplete(recordId) {
     const url = `${CONFIG.API_BASE_URL}${CONFIG.ENDPOINTS.MOCKUP_COMPLETE(encodeURIComponent(recordId))}`;
 
     const response = await fetch(url, {
-        method: "POST"
-    });
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        mockupFiles
+    })
+});
 
     if (!response.ok) {
         throw new Error(`Failed to mark mockup complete: ${response.status}`);
