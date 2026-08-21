@@ -380,7 +380,121 @@ async function populatePSDDropdownFromDB(productType = null) {
         console.error(error?.stack);
     }
 }
+async function runClockmakerListingAssetTest() {
+    const manifest =
+        await loadListingAssetManifestFromJsonFile();
 
+    if (!manifest) {
+        return;
+    }
+
+    const {
+        records
+    } = manifest;
+
+    const assetRootFolder =
+        await fs.getFolder();
+
+    if (!assetRootFolder?.isFolder) {
+        throw new Error(
+            "A Mosswick listing-asset root folder is required."
+        );
+    }
+
+    const record =
+        records.find(item => {
+            const artworkId =
+                item?.ArtworkId ??
+                item?.artworkId;
+
+            const templateKey =
+                item?.TemplateKey ??
+                item?.templateKey;
+
+            return (
+                artworkId ===
+                "artwork.clockmakers_cottage.001" &&
+                templateKey ===
+                "print-ratios"
+            );
+        });
+
+    if (!record) {
+        throw new Error(
+            "Clockmaker print - ratios listing asset record was not found."
+        );
+    }
+
+    const templateFile =
+        record?.TemplateFile ??
+        record?.templateFile;
+
+    if (!templateFile) {
+        throw new Error(
+            "Listing asset record does not contain TemplateFile."
+        );
+    }
+
+    console.log(
+        "Running Clockmaker listing asset test:",
+        record
+    );
+
+    const templateDoc =
+        await openPSDFromRoot(
+            templateFile
+        );
+
+    try {
+        return await runListingAssetWorkflow(
+            templateDoc,
+            [record],
+            assetRootFolder
+        );
+    } finally {
+        await core.executeAsModal(
+            async () => {
+                await templateDoc.closeWithoutSaving();
+            },
+            {
+                commandName:
+                    "Close listing asset test template"
+            }
+        );
+    }
+}
+async function loadListingAssetManifestFromJsonFile() {
+    const jsonFile =
+        await fs.getFileForOpening({
+            types: ["json"]
+        });
+
+    if (!jsonFile) {
+        return null;
+    }
+
+    const jsonText =
+        await jsonFile.read();
+
+    const records =
+        JSON.parse(jsonText);
+
+    if (!Array.isArray(records)) {
+        throw new Error(
+            "Listing asset manifest must contain an array."
+        );
+    }
+
+    console.log(
+        `Loaded listing asset manifest with ` +
+        `${records.length} record(s).`
+    );
+
+    return {
+        records,
+        manifestFile: jsonFile
+    };
+}
 async function populatePSDDropdownFromJsonFile() {
     const jsonFile = await fs.getFileForOpening({ types: ["json"] });
 
@@ -448,6 +562,15 @@ const workflowProcessors = new Map([
                 templateDoc,
                 items,
                 templateKey 
+            );
+        }
+    ],
+    [
+        "listing-asset",
+        async ({ templateDoc, items }) => {
+            return await runListingAssetWorkflow(
+                templateDoc,
+                items
             );
         }
     ]
@@ -1300,6 +1423,74 @@ async function exportPrintableWallArtPng(
 
     return outputFile;
 }
+async function exportListingAssetPng(
+    document,
+    assetRootFolder,
+    outputFilePath
+) {
+    if (!document) {
+        throw new Error(
+            "A document is required to export a listing asset."
+        );
+    }
+
+    if (!assetRootFolder?.isFolder) {
+        throw new Error(
+            "A valid listing-asset root folder is required."
+        );
+    }
+
+    if (!outputFilePath) {
+        throw new Error(
+            "A listing-asset output path is required."
+        );
+    }
+
+    const normalizedPath =
+        outputFilePath.replace(/\\/g, "/");
+
+    const pathParts =
+        normalizedPath
+            .split("/")
+            .filter(Boolean);
+
+    const outputFileName =
+        pathParts.pop();
+
+    let outputFolder =
+        assetRootFolder;
+
+    for (const folderName of pathParts) {
+        outputFolder =
+            await getOrCreateChildFolder(
+                outputFolder,
+                folderName
+            );
+    }
+
+    const outputFile =
+        await outputFolder.createFile(
+            outputFileName,
+            {
+                overwrite: true
+            }
+        );
+
+    await document.saveAs.png(
+        outputFile,
+        {
+            compression: 6,
+            interlaced: false
+        },
+        true
+    );
+
+    return outputFile;
+}
+
+
+
+
 async function getOrCreateChildFolder(
     parentFolder,
     folderName
@@ -1452,6 +1643,124 @@ async function ensureUxpFileEntry(
         `or supported binary value: ${fileName}`
     );
 }
+
+
+async function runListingAssetWorkflow(
+    templateDoc,
+    items,
+    assetRootFolder
+) {
+    if (!templateDoc) {
+        throw new Error(
+            "A template document is required for listing assets."
+        );
+    }
+
+    if (!Array.isArray(items)) {
+        throw new Error(
+            "Listing-asset record source must return an array."
+        );
+    }
+
+    let processed = 0;
+    let failed = 0;
+
+    for (let index = 0; index < items.length; index++) {
+        const item = items[index];
+
+        const outputFilePath =
+            item?.OutputFile ??
+            item?.outputFile;
+
+        const replacements =
+            item?.Replacements ??
+            item?.replacements;
+
+        if (
+            !outputFilePath ||
+            !Array.isArray(replacements)
+        ) {
+            console.warn(
+                "Skipping incomplete listing-asset record:",
+                item
+            );
+
+            failed++;
+            continue;
+        }
+
+        try {
+            const workingDocument =
+                await core.executeAsModal(
+                    async () => {
+                        return await templateDoc.duplicate();
+                    },
+                    {
+                        commandName:
+                            "Duplicate listing-asset template"
+                    }
+                );
+
+            try {
+                await core.executeAsModal(
+                    async () => {
+                        await applyListingAssetReplacements(
+                            workingDocument,
+                            replacements,
+                            assetRootFolder
+                        );
+
+                        const outputFile =
+                            await exportListingAssetPng(
+                                workingDocument,
+                                assetRootFolder,
+                                outputFilePath
+                            );
+
+                        console.log(
+                            `Exported listing asset: ${outputFile.name}`
+                        );
+                    },
+                    {
+                        commandName:
+                            "Generate listing asset"
+                    }
+                );
+
+                processed++;
+            } finally {
+                await core.executeAsModal(
+                    async () => {
+                        await workingDocument.close(
+                            constants.SaveOptions
+                                .DONOTSAVECHANGES
+                        );
+                    },
+                    {
+                        commandName:
+                            "Close listing-asset document"
+                    }
+                );
+            }
+        } catch (error) {
+            failed++;
+
+            console.error(
+                "Listing-asset workflow failed:",
+                error
+            );
+        }
+    }
+
+    return {
+        processed,
+        failed
+    };
+}
+
+
+
+
 async function runPrintableWallArtWorkflow(
     templateDoc,
     items,
@@ -1741,6 +2050,25 @@ async function runPrintableWallArtWorkflow(
         failedRecordIds,
         mockupFilesByRecordId
     };
+}
+async function getFileFromManifestRelativePath(
+    assetRootFolder,
+    relativePath
+) {
+    if (!assetRootFolder?.isFolder) {
+        throw new Error(
+            "A valid listing-asset root folder is required."
+        );
+    }
+    if (!relativePath) {
+        throw new Error(
+            "A listing-asset source path is required."
+        );
+    }
+    return await getFileFromRelativePath(
+        assetRootFolder,
+        relativePath
+    );
 }
 async function getPngFileFromApi(containerPath, fileName) {
     const relativePath = containerPath.replace(/^\/data\/builds\//, "");
@@ -2170,6 +2498,104 @@ async function findLayerByNameRecursive(layers, targetName) {
 
     return null;
 }
+
+async function applyListingAssetReplacements(
+    document,
+    replacements,
+    manifestFile
+) {
+    if (!document) {
+        throw new Error(
+            "A document is required for listing-asset replacements."
+        );
+    }
+
+    if (!Array.isArray(replacements)) {
+        throw new Error(
+            "Listing-asset replacements must be an array."
+        );
+    }
+
+    for (const replacement of replacements) {
+        const layerName =
+            replacement?.LayerName ??
+            replacement?.layerName;
+
+        const sourceImageFile =
+            replacement?.SourceImageFile ??
+            replacement?.sourceImageFile;
+
+        if (!layerName || !sourceImageFile) {
+            throw new Error(
+                "Each listing-asset replacement requires " +
+                "LayerName and SourceImageFile."
+            );
+        }
+
+        const layer =
+            await findLayerByNameRecursive(
+                document.layers,
+                layerName
+            );
+
+        if (!layer) {
+            throw new Error(
+                `Listing-asset layer not found: ${layerName}`
+            );
+        }
+
+        const sourceFileName =
+            sourceImageFile
+                .replace(/\\/g, "/")
+                .split("/")
+                .pop();
+
+        const sourceFile =
+            await getFileFromManifestRelativePath(
+                manifestFile,
+                sourceImageFile
+            );
+
+        if (!sourceFile?.isFile) {
+            throw new Error(
+                `Listing-asset source file was not found: ` +
+                `${sourceImageFile}`
+            );
+        }
+
+        console.log(
+            `Replacing listing-asset layer "${layerName}" ` +
+            `with "${sourceFileName}".`
+        );
+
+        await replaceSmartObjectContents(
+            layer,
+            sourceFile
+        );
+        if (layerName.startsWith("ARTWORK_")) {
+            const windowLayerName =
+                `${layerName}_WINDOW`;
+
+            const windowLayer =
+                await findLayerByNameRecursive(
+                    document.layers,
+                    windowLayerName
+                );
+
+            if (windowLayer) {
+                await fitLayerToLayerBounds(
+                    layer,
+                    windowLayer
+                );
+                windowLayer.visible = false;
+                console.log(
+                    `Fitted ${layerName} to ${windowLayerName}.`
+                );
+            }
+        }
+    }
+}
+
 
 async function replaceSmartObjectContents(layer, fileEntry) {
     if (!layer) {
@@ -2872,7 +3298,8 @@ function getPickerValue(picker) {
 // Manifest command hookup
 entrypoints.setup({
     commands: {
-        runBatchMockupGeneration
+        runBatchMockupGeneration,
+        runClockmakerListingAssetTest
     },
     panels: {
         mainPanel: {

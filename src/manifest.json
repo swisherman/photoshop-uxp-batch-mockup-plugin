@@ -25,6 +25,11 @@
 
     },
     {
+      "type": "command",
+      "id": "runClockmakerListingAssetTest",
+      "label": "Run Clockmaker Listing Asset Test"
+    },
+    {
       "type": "panel",
       "id": "mainPanel",
       "minimumSize": {
