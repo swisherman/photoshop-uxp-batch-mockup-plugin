@@ -30,6 +30,13 @@
       "label": "Run Clockmaker Listing Asset Test"
     },
     {
+      "type": "command",
+      "id": "runAllListingAssetsFromManifest",
+      "label": {
+        "default": "Run All Listing Assets From Manifest"
+      }
+    },
+    {
       "type": "panel",
       "id": "mainPanel",
       "minimumSize": {

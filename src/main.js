@@ -463,6 +463,155 @@ async function runClockmakerListingAssetTest() {
         );
     }
 }
+
+
+async function runAllListingAssetsFromManifest() {
+    const manifest =
+        await loadListingAssetManifestFromJsonFile();
+
+    if (!manifest) {
+        return;
+    }
+
+    const {
+        records
+    } = manifest;
+
+    if (!Array.isArray(records) || records.length === 0) {
+        throw new Error(
+            "The listing-asset manifest does not contain any records."
+        );
+    }
+
+    const groupedRecords = new Map();
+
+    for (const record of records) {
+        const templateFile =
+            record?.TemplateFile ??
+            record?.templateFile;
+
+        const templateKey =
+            record?.TemplateKey ??
+            record?.templateKey;
+
+        if (!templateFile) {
+            console.warn(
+                "Skipping listing-asset record without TemplateFile:",
+                record
+            );
+
+            continue;
+        }
+
+        if (!groupedRecords.has(templateFile)) {
+            groupedRecords.set(
+                templateFile,
+                {
+                    templateKey,
+                    records: []
+                }
+            );
+        }
+
+        groupedRecords
+            .get(templateFile)
+            .records
+            .push(record);
+    }
+
+    console.log(
+        `Loaded ${records.length} listing-asset records.`
+    );
+
+    console.log(
+        `Grouped into ${groupedRecords.size} listing-asset templates.`
+    );
+    const assetRootFolder =
+        await fs.getFolder();
+
+    if (!assetRootFolder?.isFolder) {
+        throw new Error(
+            "A Mosswick listing-asset root folder is required."
+        );
+    }
+
+    let processed = 0;
+    let failed = 0;
+
+    for (const [
+        templateFilePath,
+        group
+    ] of groupedRecords) {
+        console.log(
+            `Processing listing-asset template: ${templateFilePath}`
+        );
+
+        console.log(
+            `Record count: ${group.records.length}`
+        );
+
+        let templateDoc;
+
+        try {
+            templateDoc =
+                await openPSDFromRoot(
+                    templateFilePath
+                );
+        } catch (error) {
+            console.error(
+                `Unable to open listing-asset template: ${templateFilePath}`,
+                error
+            );
+
+            failed += group.records.length;
+            continue;
+        }
+        try {
+            const result =
+                await runListingAssetWorkflow(
+                    templateDoc,
+                    group.records,
+                    assetRootFolder
+                );
+
+            processed += result.processed;
+            failed += result.failed;
+
+            console.log(
+                `Finished template "${group.templateKey}". ` +
+                `Processed: ${result.processed}, ` +
+                `Failed: ${result.failed}`
+            );
+        } catch (error) {
+            failed += group.records.length;
+
+            console.error(
+                `Listing-asset template group failed: ${templateFilePath}`,
+                error
+            );
+        } finally {
+            await core.executeAsModal(
+                async () => {
+                    await templateDoc.closeWithoutSaving();
+                },
+                {
+                    commandName:
+                        "Close listing-asset template"
+                }
+            );
+        }
+    }
+
+    console.log(
+        `Listing-asset batch complete. ` +
+        `Processed: ${processed}, Failed: ${failed}`
+    );
+
+    return {
+        processed,
+        failed
+    };
+}
 async function loadListingAssetManifestFromJsonFile() {
     const jsonFile =
         await fs.getFileForOpening({
@@ -561,7 +710,7 @@ const workflowProcessors = new Map([
             return await runPrintableWallArtWorkflow(
                 templateDoc,
                 items,
-                templateKey 
+                templateKey
             );
         }
     ],
@@ -2027,7 +2176,7 @@ async function runPrintableWallArtWorkflow(
                 mockupFiles
             );
         }
-            
+
             processed++;
         } catch (err) {
             failed++;
@@ -2158,7 +2307,7 @@ async function runBatchMockupGeneration() {
         }
 
         if (shouldTrackBatchStatus) {
-          
+
         }
         const failedRecordIds = new Set();
         const mockupFilesByRecordId = new Map();
@@ -2243,7 +2392,7 @@ async function runBatchMockupGeneration() {
         }
 
         if (shouldTrackBatchStatus) {
-            
+
         }
 
         if (productType === "printable-wall-art") {
@@ -2307,9 +2456,9 @@ async function runBatchMockupGeneration() {
                     : String(err);
 
             try {
-               
+
             } catch (statusError) {
-                
+
             }
         }
 
@@ -2874,7 +3023,7 @@ if (changePSDRootFolder) {
         changeInputFolder.addEventListener("click", async () => {
             const { inputTokenKey,outputTokenKey } = getFolderTokenKeysForSelectedSource();
             const folder = await resetFolder(inputTokenKey, "Select New Input Folder");
-       
+
             const outputFolder = await getRememberedFolder(outputTokenKey, null, false);
 
             updateFolderStatus(folder, outputFolder);
@@ -3299,7 +3448,8 @@ function getPickerValue(picker) {
 entrypoints.setup({
     commands: {
         runBatchMockupGeneration,
-        runClockmakerListingAssetTest
+        runClockmakerListingAssetTest,
+        runAllListingAssetsFromManifest
     },
     panels: {
         mainPanel: {
