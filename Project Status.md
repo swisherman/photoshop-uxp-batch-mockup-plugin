@@ -24,7 +24,7 @@ Maintain a professional, publicly presentable project that:
 - **Priority:** Low
 - **Health:** Nearly Complete
 - **Work Status:** Ready
-- **Last Meaningful Attention:** October 6, 2026
+- **Last Meaningful Attention:** October 14, 2026
 - **Review Frequency:** Monthly
 - **Current Release:** `v0.2.0`
 - **License:** MIT
@@ -34,13 +34,17 @@ Maintain a professional, publicly presentable project that:
 
 ## Current Outcome
 
-Retain the plugin as a maintenance project and portfolio asset. On October 6, verified that the public GitHub repository already includes the adobe-photoshop topic. The local repository was clean and synchronized at commit 767468a.
+The local JSON demo successfully completed a two-step Photoshop workflow: combine a phrase with raccoon artwork, then generate mockup-group PNG exports. Panel scrolling, PSD source selection, and PSD JSON loading were corrected during setup.
+
+A screen recording of the successful workflow was edited in Clipchamp and exported for Fiverr-related YouTube marketing. Publication is pending. See [October 14 demo checkpoint](docs/2026-10-14-local-json-demo.md).
 
 ## Current Milestone
 
-Pending GitHub topic correction verified complete. No new Photoshop runtime validation was performed during this checkpoint review.
+One-design local JSON workflow validated in Photoshop using the phrase-replacer and shirt mockup templates. Nine mockup-group PNG exports were logged; Groups 1 and 2 were visually inspected. This checkpoint does not establish broader batch or database-workflow regression coverage. No new release was created.
 
 ## Next Action
 
-At the next monthly maintenance review, check repository presentation and open issues. Run a Photoshop smoke test when plugin code, Photoshop/UXP compatibility, or production workflows change.
+Review and commit the local JSON workflow and UI fixes with this checkpoint. Retain the working local installation: the original fix ZIP predates the later source-selection and JSON-loader corrections.
+
+Review the exported marketing video and continue publication work in Fiverr.Servicekits. At the next maintenance review, check repository presentation and open issues; repeat a Photoshop smoke test when code or compatibility changes.
 

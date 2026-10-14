@@ -346,3 +346,26 @@ footer {
 .status-chip .chip-value {
     margin-left: 5px;
 }
+/* Keep expanded settings accessible in the UXP panel. */
+html {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#mainPanelSection {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+#mainPanelSection > .panel-section {
+    flex-shrink: 0;
+}

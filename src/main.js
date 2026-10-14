@@ -111,7 +111,7 @@ async function changePsdRootFolder() {
 }
 function getSelectedPsdSource() {
     const group = document.getElementById("psdSourceGroup");
-    return group?.getAttribute("selected") || "db";
+    return group?.selected || group?.getAttribute("selected") || "db";
 }
 async function openPSDFromRoot(filePathName) {
     if (!filePathName) {
@@ -645,22 +645,31 @@ async function loadListingAssetManifestFromJsonFile() {
     };
 }
 async function populatePSDDropdownFromJsonFile() {
-    const jsonFile = await fs.getFileForOpening({ types: ["json"] });
+    try {
+        const file = await fs.getFileForOpening({ types: ["json"] });
+        if (!file) return;
 
-    if (!jsonFile) {
-        await app.showAlert("No PSD JSON file selected.");
-        return;
+        const text = (await file.read()).replace(/^\uFEFF/, "");
+        const records = JSON.parse(text);
+
+        if (!Array.isArray(records) || !records.length) {
+            throw new Error("The PSD list must be a nonempty array.");
+        }
+
+        currentPSDWorkflowSteps = [...records].sort(
+            (a, b) => Number(a.WorkflowStep) - Number(b.WorkflowStep)
+        );
+        await populatePSDDropdownFromRecords(currentPSDWorkflowSteps);
+
+        await app.showAlert(
+            "Loaded " + file.name + "\n" +
+            records.length + " workflow step(s).\n" +
+            records.map(r => r.Description).join("\n")
+        );
+    } catch (error) {
+        console.error("PSD JSON loading failed:", error);
+        await app.showAlert("PSD JSON loading failed:\n" + error.message);
     }
-
-    const jsonText = await jsonFile.read();
-    const records = JSON.parse(jsonText);
-
-    if (!Array.isArray(records)) {
-        await app.showAlert("PSD JSON file must contain an array.");
-        return;
-    }
-
-    await populatePSDDropdownFromRecords(records);
 }
 
 async function openSelectedTemplatePSD(picker) {
@@ -952,7 +961,11 @@ async function applyPhraseAndMascot(doc,phrase, designFile) {
     }
 
     const phraseSmartObjectLayer = await findLayerByNameRecursive(doc.layers, PHRASE_SMART_OBJECT_NAME);
-    await logWorkflowEvent(`Applying phrase: ${phrase}`);
+    if (getSelectedPhraseSource() === "json") {
+        console.log(`Applying phrase: ${phrase}`);
+    } else {
+        await logWorkflowEvent(`Applying phrase: ${phrase}`);
+    }
     await replaceSmartObjectContents(mascotLayer, designFile);
     await renameLayer(mascotLayer, MASCOT_LAYER_NAME);
 
@@ -2239,6 +2252,21 @@ async function getPngFileFromApi(containerPath, fileName) {
     return tempFile;
 }
 async function runBatchMockupGeneration() {
+    if (getSelectedPhraseSource() === "json") {
+        if (getSelectedPsdSource() !== "json") {
+            throw new Error("For the local demo, set both PSD Source and Mockup Source to JSON File.");
+        }
+        const result = await require("./local-json-workflow.js")(currentPSDWorkflowSteps, {
+            fs, core, openTemplate: openWorkflowTemplate,
+            applyDesign: applyPhraseAndMascot, applyMockup: applyArtworkToMockup,
+            exportPng: exportPNG, exportGroups: exportEachMockupGroup,
+            getFolders: getFolderTokenKeysForSelectedSource,
+            rememberFolder: getRememberedFolder, childFolder: getOrCreateSubfolder,
+            updateFolders: updateFolderStatus
+        });
+        await app.showAlert(`Local demo finished: ${result.processed} design(s).`);
+        return result;
+    }
     let selectedBatchId = null;
     let shouldTrackBatchStatus = false;
 
@@ -2791,7 +2819,11 @@ async function replaceSmartObjectContents(layer, fileEntry) {
 async function logLayersRecursive(layers, depth = 0) {
     for (const layer of layers) {
         const indent = "  ".repeat(depth);
-        await logWorkflowEvent(`${indent}- ${layer.name} (id: ${layer.id})`);
+        if (getSelectedPhraseSource() === "json") {
+            console.log(`${indent}- ${layer.name} (id: ${layer.id})`);
+        } else {
+            await logWorkflowEvent(`${indent}- ${layer.name} (id: ${layer.id})`);
+        }
 
         if (layer.layers && layer.layers.length > 0) {
             await logLayersRecursive(layer.layers, depth + 1);
