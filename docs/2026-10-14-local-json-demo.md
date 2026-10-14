@@ -42,4 +42,4 @@ Known local backups:
 
 ## Marketing handoff
 
-The successful run was recorded, edited, captioned, and exported in Clipchamp. Track publication in Fiverr.Servicekits. No new plugin release or YouTube publication was completed.
+The successful run was recorded, edited, captioned, and exported in Clipchamp. Track publication in Fiverr.Servicekits. No new plugin release was created. Later the same day, the revised 24.10-second demo was published on YouTube: https://youtu.be/YJQpAaQmp1E. Publication and monitoring details are recorded in Fiverr.Servicekits.
