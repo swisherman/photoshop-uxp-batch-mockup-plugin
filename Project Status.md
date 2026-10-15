@@ -36,7 +36,7 @@ Maintain a professional, publicly presentable project that:
 
 The local JSON demo successfully completed a two-step Photoshop workflow: combine a phrase with raccoon artwork, then generate mockup-group PNG exports. Panel scrolling, PSD source selection, and PSD JSON loading were corrected during setup.
 
-A screen recording of the successful workflow was edited in Clipchamp and exported for Fiverr-related YouTube marketing. Publication is pending. See [October 14 demo checkpoint](docs/2026-10-14-local-json-demo.md).
+A screen recording of the successful workflow was edited in Clipchamp and exported for Fiverr-related YouTube marketing. The demo was published on YouTube October 14, 2026: https://youtu.be/YJQpAaQmp1E. See [October 14 demo checkpoint](docs/2026-10-14-local-json-demo.md).
 
 ## Current Milestone
 
@@ -44,7 +44,7 @@ One-design local JSON workflow validated in Photoshop using the phrase-replacer 
 
 ## Next Action
 
-Review and commit the local JSON workflow and UI fixes with this checkpoint. Retain the working local installation: the original fix ZIP predates the later source-selection and JSON-loader corrections.
+Local JSON workflow and UI fixes were committed as 4e35abe; demo publication was recorded as f1050d0. Retain the working local installation: the original fix ZIP predates the later source-selection and JSON-loader corrections.
 
-Review the exported marketing video and continue publication work in Fiverr.Servicekits. At the next maintenance review, check repository presentation and open issues; repeat a Photoshop smoke test when code or compatibility changes.
+Marketing follow-up belongs in Fiverr Business Setup: verify public playback and the Fiverr description link, then capture initial YouTube analytics October 21. At the next maintenance review, check repository presentation and open issues; repeat a Photoshop smoke test when code or compatibility changes.
 
