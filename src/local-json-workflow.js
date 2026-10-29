@@ -4,10 +4,11 @@ module.exports = async function runLocalJsonWorkflow(steps, deps) {
         exportGroups, getFolders, childFolder, updateFolders } = deps;
     if (!Array.isArray(steps) || !steps.length) throw new Error('Load a PSD workflow JSON first.');
     const ordered = [...steps].sort((a, b) => Number(a.WorkflowStep) - Number(b.WorkflowStep));
-    if (Number(ordered[0].WorkflowStep) !== 10 ||
-        ordered.filter(s => Number(s.WorkflowStep) === 10).length !== 1 ||
-        ordered.some(s => s.ProductType !== 'tshirt' || !s.FilePathName || ![10, 20].includes(Number(s.WorkflowStep)))) {
-        throw new Error('Local mode requires one tshirt Step 10, followed by optional Step 20 templates.');
+    const designSteps = ordered.filter(s => Number(s.WorkflowStep) === 10);
+    const finishedArtwork = designSteps.length === 0;
+    if (designSteps.length > 1 || ordered.some(s => s.ProductType !== 'tshirt' ||
+        !s.FilePathName || ![10, 20].includes(Number(s.WorkflowStep)))) {
+        throw new Error('Local mode requires tshirt Step 20 templates only, or one Step 10 followed by optional Step 20 templates.');
     }
     const jsonFile = await fs.getFileForOpening({ types: ['json'] });
     if (!jsonFile) throw new Error('No artwork records JSON selected.');
@@ -31,6 +32,10 @@ module.exports = async function runLocalJsonWorkflow(steps, deps) {
         const folder = await input.getEntry(item.FolderName);
         const file = await folder.getEntry(item.Filename);
         if (!file.isFile) throw new Error('Artwork file not found: ' + item.Filename);
+        const existingOutputs = await output.getEntries();
+        if (existingOutputs.some(entry => entry.name.toLowerCase() === item.FolderName.toLowerCase())) {
+            throw new Error('Output folder already exists; choose a fresh output root: ' + item.FolderName);
+        }
         prepared.push({ item, file });
     }
     let completed = 0;
@@ -41,7 +46,7 @@ module.exports = async function runLocalJsonWorkflow(steps, deps) {
             const template = await openTemplate(step);
             let working;
             try {
-                const artwork = Number(step.WorkflowStep) === 20 ? await out.getEntry(baseName + '.png') : file;
+                const artwork = Number(step.WorkflowStep) === 20 && !finishedArtwork ? await out.getEntry(baseName + '.png') : file;
                 await core.executeAsModal(async () => {
                     working = await template.duplicate();
                     if (Number(step.WorkflowStep) === 10) {
